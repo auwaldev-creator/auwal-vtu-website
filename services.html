@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Services | VTU Website</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a href="index.html" class="logo">VTU<span>Hub</span></a>
+            <div class="nav-links">
+                <a href="dashboard.html">Dashboard</a>
+                <a href="services.html" class="active">Services</a>
+                <a href="profile.html">Profile</a>
+                <a href="#" id="logoutBtn">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1 class="section-title">VTU Services</h1>
+        
+        <!-- Data Services -->
+        <div id="data" class="services-container">
+            <h2><i class="fas fa-wifi"></i> Data Bundle</h2>
+            <form class="service-form" id="dataForm">
+                <div class="form-group">
+                    <label>Network</label>
+                    <div class="network-options">
+                        <button type="button" class="network-btn active" data-network="MTN">MTN</button>
+                        <button type="button" class="network-btn" data-network="GLO">Glo</button>
+                        <button type="button" class="network-btn" data-network="AIRTEL">Airtel</button>
+                        <button type="button" class="network-btn" data-network="9MOBILE">9mobile</button>
+                    </div>
+                    <input type="hidden" id="dataNetwork" value="MTN">
+                </div>
+                
+                <div class="form-group">
+                    <label>Phone Number</label>
+                    <input type="tel" id="dataPhone" placeholder="08012345678" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Data Plan</label>
+                    <select id="dataPlan" required>
+                        <option value="">Select plan</option>
+                        <option value="100MB">100MB - ₦100</option>
+                        <option value="200MB">200MB - ₦200</option>
+                        <option value="500MB">500MB - ₦500</option>
+                        <option value="1GB">1GB - ₦1,000</option>
+                        <option value="2GB">2GB - ₦2,000</option>
+                        <option value="5GB">5GB - ₦5,000</option>
+                    </select>
+                </div>
+                
+                <button type="submit" class="btn-primary btn-block">Buy Data Now</button>
+            </form>
+        </div>
+        
+        <!-- Airtime Services -->
+        <div id="airtime" class="services-container">
+            <h2><i class="fas fa-phone-alt"></i> Airtime Top-up</h2>
+            <form class="service-form" id="airtimeForm">
+                <div class="form-group">
+                    <label>Phone Number</label>
+                    <input type="tel" id="airtimePhone" placeholder="08012345678" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Amount (₦)</label>
+                    <input type="number" id="airtimeAmount" min="50" max="10000" placeholder="500" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Network</label>
+                    <select id="airtimeNetwork" required>
+                        <option value="MTN">MTN</option>
+                        <option value="GLO">Glo</option>
+                        <option value="AIRTEL">Airtel</option>
+                        <option value="9MOBILE">9mobile</option>
+                    </select>
+                </div>
+                
+                <button type="submit" class="btn-primary btn-block">Buy Airtime</button>
+            </form>
+        </div>
+        
+        <!-- More services sections can be added similarly -->
+        
+    </div>
+
+    <script src="supabase-config.js"></script>
+    <script src="js/services.js"></script>
+    <script>
+        // Network selection for data
+        document.querySelectorAll('.network
