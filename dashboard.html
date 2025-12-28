@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | VTU Website</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <a href="index.html" class="logo">VTU<span>Hub</span></a>
+            <div class="nav-links">
+                <a href="dashboard.html" class="active">Dashboard</a>
+                <a href="services.html">Services</a>
+                <a href="profile.html">Profile</a>
+                <a href="#" id="logoutBtn">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Dashboard Header -->
+    <header class="dashboard-header">
+        <div class="container">
+            <div class="user-info">
+                <div class="user-welcome">
+                    <h1>Welcome, <span id="userName">User</span></h1>
+                    <p id="userEmail">user@example.com</p>
+                </div>
+                <div class="balance-card">
+                    <h3>Account Balance</h3>
+                    <div class="amount">₦<span id="userBalance">0.00</span></div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Quick Actions -->
+    <main class="dashboard-main">
+        <div class="container">
+            <h2 class="section-title">Quick Services</h2>
+            <div class="quick-actions">
+                <a href="services.html#data" class="action-card">
+                    <i class="fas fa-wifi"></i>
+                    <h3>Buy Data</h3>
+                    <p>MTN, Glo, Airtel, 9mobile</p>
+                </a>
+                <a href="services.html#airtime" class="action-card">
+                    <i class="fas fa-phone-alt"></i>
+                    <h3>Buy Airtime</h3>
+                    <p>Instant recharge</p>
+                </a>
+                <a href="services.html#electricity" class="action-card">
+                    <i class="fas fa-bolt"></i>
+                    <h3>Electricity</h3>
+                    <p>Pay bills</p>
+                </a>
+                <a href="services.html#nin" class="action-card">
+                    <i class="fas fa-print"></i>
+                    <h3>NIN Print</h3>
+                    <p>Download NIN slip</p>
+                </a>
+                <a href="services.html#bvn" class="action-card">
+                    <i class="fas fa-id-card"></i>
+                    <h3>BVN Print</h3>
+                    <p>Get BVN details</p>
+                </a>
+                <a href="services.html#exam" class="action-card">
+                    <i class="fas fa-graduation-cap"></i>
+                    <h3>Exam PIN</h3>
+                    <p>Generate exam PINs</p>
+                </a>
+            </div>
+
+            <!-- Recent Transactions -->
+            <div class="recent-transactions">
+                <h2 class="section-title">Recent Transactions</h2>
+                <div id="transactionsList" class="transactions-list">
+                    <p>No transactions yet</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="supabase-config.js"></script>
+    <script src="js/dashboard.js"></script>
+    <script>
+        // Logout functionality
+        document.getElementById('logoutBtn').addEventListener('click', async (e) => {
+            e.preventDefault();
+            await supabase.auth.signOut();
+            window.location.href = 'index.html';
+        });
+    </script>
+</body>
+</html>
