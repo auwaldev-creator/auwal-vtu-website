@@ -40,7 +40,7 @@
                 
                 <div class="form-group">
                     <label>Phone Number</label>
-                    <input type="tel" id="dataPhone" placeholder="08012345678" required>
+                    <input type="tel" id="dataPhone" placeholder="08160343841" required>
                 </div>
                 
                 <div class="form-group">
@@ -96,4 +96,13 @@
     <script src="js/services.js"></script>
     <script>
         // Network selection for data
-        document.querySelectorAll('.network
+        document.querySelectorAll('.network-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.network-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                document.getElementById('dataNetwork').value = btn.dataset.network;
+            });
+        });
+    </script>
+</body>
+</html>
