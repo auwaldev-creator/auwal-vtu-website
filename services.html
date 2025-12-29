@@ -6,6 +6,8 @@
     <title>Services | VTU Website</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- SUPABASE CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
     <nav class="navbar">
@@ -40,7 +42,7 @@
                 
                 <div class="form-group">
                     <label>Phone Number</label>
-                    <input type="tel" id="dataPhone" placeholder="08160343841" required>
+                    <input type="tel" id="dataPhone" placeholder="08012345678" required>
                 </div>
                 
                 <div class="form-group">
@@ -88,19 +90,85 @@
             </form>
         </div>
         
-        <!-- More services sections can be added similarly -->
+        <!-- Electricity -->
+        <div id="electricity" class="services-container">
+            <h2><i class="fas fa-bolt"></i> Electricity Bill</h2>
+            <form class="service-form" id="electricityForm">
+                <div class="form-group">
+                    <label>Disco Company</label>
+                    <select id="discoCompany" required>
+                        <option value="">Select company</option>
+                        <option value="IKEDC">IKEDC (Ikeja)</option>
+                        <option value="EKEDC">EKEDC (Eko)</option>
+                        <option value="IBEDC">IBEDC (Ibadan)</option>
+                        <option value="AEDC">AEDC (Abuja)</option>
+                        <option value="KEDCO">KEDCO (Kano)</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Meter Number</label>
+                    <input type="text" id="meterNumber" placeholder="Enter meter number" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Amount (₦)</label>
+                    <input type="number" id="electricityAmount" min="1000" placeholder="2000" required>
+                </div>
+                
+                <button type="submit" class="btn-primary btn-block">Pay Electricity Bill</button>
+            </form>
+        </div>
+        
+        <!-- NIN Print -->
+        <div id="nin" class="services-container">
+            <h2><i class="fas fa-print"></i> NIN Printout</h2>
+            <form class="service-form" id="ninForm">
+                <div class="form-group">
+                    <label>NIN Number</label>
+                    <input type="text" id="ninNumber" placeholder="Enter 11-digit NIN" pattern="[0-9]{11}" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Phone Number</label>
+                    <input type="tel" id="ninPhone" placeholder="Phone linked to NIN" required>
+                </div>
+                
+                <button type="submit" class="btn-primary btn-block">Generate NIN Printout</button>
+            </form>
+        </div>
         
     </div>
 
     <script src="supabase-config.js"></script>
-    <script src="js/services.js"></script>
     <script>
-        // Network selection for data
-        document.querySelectorAll('.network-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                document.querySelectorAll('.network-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                document.getElementById('dataNetwork').value = btn.dataset.network;
+        document.addEventListener('DOMContentLoaded', function() {
+            initSupabase();
+            
+            // Logout functionality
+            document.getElementById('logoutBtn').addEventListener('click', async (e) => {
+                e.preventDefault();
+                if (window.supabaseClient) {
+                    await window.supabaseClient.auth.signOut();
+                    window.location.href = 'index.html';
+                }
+            });
+            
+            // Network selection for data
+            document.querySelectorAll('.network-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.network-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    document.getElementById('dataNetwork').value = btn.dataset.network;
+                });
+            });
+            
+            // Handle form submissions
+            document.querySelectorAll('.service-form').forEach(form => {
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    alert('Service feature coming soon! For now, this is a demo.');
+                });
             });
         });
     </script>
