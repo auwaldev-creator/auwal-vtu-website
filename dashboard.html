@@ -6,6 +6,8 @@
     <title>Dashboard | VTU Website</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- SUPABASE CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
     <!-- Navigation -->
@@ -85,13 +87,55 @@
     </main>
 
     <script src="supabase-config.js"></script>
-    <script src="js/dashboard.js"></script>
     <script>
-        // Logout functionality
-        document.getElementById('logoutBtn').addEventListener('click', async (e) => {
-            e.preventDefault();
-            await supabase.auth.signOut();
-            window.location.href = 'index.html';
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Initialize Supabase
+            initSupabase();
+            
+            if (!window.supabaseClient) {
+                alert('Application error. Please refresh.');
+                return;
+            }
+            
+            // Load user data
+            async function loadUserData() {
+                const { data: { user } } = await window.supabaseClient.auth.getUser();
+                
+                if (!user) {
+                    window.location.href = 'auth.html';
+                    return;
+                }
+                
+                // Display user info
+                document.getElementById('userName').textContent = user.email.split('@')[0];
+                document.getElementById('userEmail').textContent = user.email;
+                
+                // Fetch profile data
+                const { data: profile, error } = await window.supabaseClient
+                    .from('profiles')
+                    .select('*')
+                    .eq('id', user.id)
+                    .single();
+                
+                if (!error && profile) {
+                    document.getElementById('userBalance').textContent = profile.balance || '0.00';
+                    
+                    // Update full name if available
+                    if (profile.full_name) {
+                        document.getElementById('userName').textContent = profile.full_name;
+                    }
+                }
+            }
+            
+            // Logout functionality
+            document.getElementById('logoutBtn').addEventListener('click', async (e) => {
+                e.preventDefault();
+                await window.supabaseClient.auth.signOut();
+                window.location.href = 'index.html';
+            });
+            
+            // Initialize
+            loadUserData();
         });
     </script>
 </body>
