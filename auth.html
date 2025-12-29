@@ -8,6 +8,16 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- SUPABASE CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 10px;
+        }
+        .loading.active {
+            display: block;
+        }
+    </style>
 </head>
 <body class="auth-page">
     <div class="auth-container">
@@ -28,7 +38,7 @@
                     <label for="loginPassword">Password</label>
                     <input type="password" id="loginPassword" placeholder="••••••••" required>
                 </div>
-                <button type="submit" class="btn-primary btn-block">Login</button>
+                <button type="submit" class="btn-primary btn-block" id="loginBtn">Login</button>
                 <p class="auth-link">Don't have an account? <a href="#" class="switch-to-signup">Sign up</a></p>
             </form>
 
@@ -47,21 +57,46 @@
                     <label for="confirmPassword">Confirm Password</label>
                     <input type="password" id="confirmPassword" placeholder="••••••••" required>
                 </div>
-                <button type="submit" class="btn-primary btn-block">Create Account</button>
+                <button type="submit" class="btn-primary btn-block" id="signupBtn">Create Account</button>
                 <p class="auth-link">Already have an account? <a href="#" class="switch-to-login">Login</a></p>
             </form>
 
             <div id="authMessage" class="message"></div>
+            <div id="loading" class="loading">
+                <i class="fas fa-spinner fa-spin"></i> Processing...
+            </div>
         </div>
     </div>
 
-    <script src="supabase-config.js"></script>
     <script>
-        // Wait for Supabase to initialize
+        // Supabase Configuration
+        const SUPABASE_URL = 'https://emsfczgikwhfjpgwkyqv.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_AuyN3-6VqWkMn11d1T_wmg_-RagFA47';
+        
+        let supabase;
+        
+        // Initialize Supabase
         document.addEventListener('DOMContentLoaded', function() {
-            // Initialize Supabase
-            initSupabase();
+            console.log('DOM loaded, initializing Supabase...');
             
+            if (window.supabase && window.supabase.createClient) {
+                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+                window.supabaseClient = supabase;
+                console.log('Supabase initialized successfully');
+                
+                // Setup event listeners
+                setupAuthEvents();
+            } else {
+                console.error('Supabase library not loaded');
+                document.getElementById('authMessage').textContent = 'Error: Supabase not loaded. Please refresh.';
+                document.getElementById('authMessage').className = 'message error';
+            }
+            
+            setupTabSwitching();
+        });
+        
+        // Tab Switching
+        function setupTabSwitching() {
             // Tab switching
             document.querySelectorAll('.tab').forEach(tab => {
                 tab.addEventListener('click', () => {
@@ -70,73 +105,94 @@
                     tab.classList.add('active');
                     document.querySelectorAll('.auth-form').forEach(form => form.classList.remove('active'));
                     document.getElementById(tabName + 'Form').classList.add('active');
+                    
+                    // Clear messages
+                    document.getElementById('authMessage').textContent = '';
+                    document.getElementById('authMessage').className = 'message';
                 });
             });
-
+            
             // Switch links
-            document.querySelector('.switch-to-signup').addEventListener('click', (e) => {
+            document.querySelector('.switch-to-signup')?.addEventListener('click', (e) => {
                 e.preventDefault();
                 document.querySelector('[data-tab="signup"]').click();
             });
-
-            document.querySelector('.switch-to-login').addEventListener('click', (e) => {
+            
+            document.querySelector('.switch-to-login')?.addEventListener('click', (e) => {
                 e.preventDefault();
                 document.querySelector('[data-tab="login"]').click();
             });
-
+        }
+        
+        // Auth Event Handlers
+        function setupAuthEvents() {
             // Handle Login
-            document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            document.getElementById('loginForm')?.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 
-                if (!window.supabaseClient) {
-                    alert('Supabase not loaded. Please refresh page.');
+                const email = document.getElementById('loginEmail').value.trim();
+                const password = document.getElementById('loginPassword').value;
+                const messageDiv = document.getElementById('authMessage');
+                const loadingDiv = document.getElementById('loading');
+                
+                if (!email || !password) {
+                    messageDiv.textContent = 'Please fill in all fields';
+                    messageDiv.className = 'message error';
                     return;
                 }
                 
-                const email = document.getElementById('loginEmail').value;
-                const password = document.getElementById('loginPassword').value;
-                const messageDiv = document.getElementById('authMessage');
-                
-                messageDiv.textContent = 'Logging in...';
+                // Show loading
+                loadingDiv.classList.add('active');
+                messageDiv.textContent = '';
                 messageDiv.className = 'message';
                 
                 try {
-                    const { data, error } = await window.supabaseClient.auth.signInWithPassword({
+                    console.log('Attempting login for:', email);
+                    const { data, error } = await supabase.auth.signInWithPassword({
                         email,
                         password
                     });
                     
-                    if (error) throw error;
+                    if (error) {
+                        console.error('Login error:', error);
+                        throw error;
+                    }
                     
+                    console.log('Login successful:', data.user.email);
                     messageDiv.textContent = 'Login successful! Redirecting...';
                     messageDiv.className = 'message success';
                     
                     // Redirect to dashboard
                     setTimeout(() => {
                         window.location.href = 'dashboard.html';
-                    }, 1500);
+                    }, 1000);
                     
                 } catch (error) {
-                    messageDiv.textContent = error.message;
+                    console.error('Login failed:', error);
+                    messageDiv.textContent = error.message || 'Login failed. Please check credentials.';
                     messageDiv.className = 'message error';
+                } finally {
+                    loadingDiv.classList.remove('active');
                 }
             });
-
+            
             // Handle Signup
-            document.getElementById('signupForm').addEventListener('submit', async (e) => {
+            document.getElementById('signupForm')?.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 
-                if (!window.supabaseClient) {
-                    alert('Supabase not loaded. Please refresh page.');
-                    return;
-                }
-                
-                const email = document.getElementById('signupEmail').value;
+                const email = document.getElementById('signupEmail').value.trim();
                 const password = document.getElementById('signupPassword').value;
                 const confirmPassword = document.getElementById('confirmPassword').value;
                 const messageDiv = document.getElementById('authMessage');
+                const loadingDiv = document.getElementById('loading');
                 
-                // Validate passwords match
+                // Validate
+                if (!email || !password || !confirmPassword) {
+                    messageDiv.textContent = 'Please fill in all fields';
+                    messageDiv.className = 'message error';
+                    return;
+                }
+                
                 if (password !== confirmPassword) {
                     messageDiv.textContent = 'Passwords do not match!';
                     messageDiv.className = 'message error';
@@ -149,11 +205,14 @@
                     return;
                 }
                 
-                messageDiv.textContent = 'Creating account...';
+                // Show loading
+                loadingDiv.classList.add('active');
+                messageDiv.textContent = '';
                 messageDiv.className = 'message';
                 
                 try {
-                    const { data, error } = await window.supabaseClient.auth.signUp({
+                    console.log('Attempting signup for:', email);
+                    const { data, error } = await supabase.auth.signUp({
                         email,
                         password,
                         options: {
@@ -161,29 +220,59 @@
                         }
                     });
                     
-                    if (error) throw error;
+                    if (error) {
+                        console.error('Signup error:', error);
+                        throw error;
+                    }
                     
-                    messageDiv.textContent = 'Account created! Check email for verification.';
-                    messageDiv.className = 'message success';
+                    console.log('Signup successful:', data.user?.email);
                     
-                    // Auto-login after signup
-                    setTimeout(async () => {
-                        const { error: loginError } = await window.supabaseClient.auth.signInWithPassword({
-                            email,
-                            password
-                        });
+                    if (data.user?.identities?.length === 0) {
+                        messageDiv.textContent = 'User already exists. Please login instead.';
+                        messageDiv.className = 'message error';
+                    } else {
+                        messageDiv.textContent = 'Account created successfully! Please check your email for verification.';
+                        messageDiv.className = 'message success';
                         
-                        if (!loginError) {
-                            window.location.href = 'dashboard.html';
-                        }
-                    }, 2000);
+                        // Auto-login after signup
+                        setTimeout(async () => {
+                            try {
+                                const { error: loginError } = await supabase.auth.signInWithPassword({
+                                    email,
+                                    password
+                                });
+                                
+                                if (!loginError) {
+                                    window.location.href = 'dashboard.html';
+                                }
+                            } catch (loginErr) {
+                                console.log('Auto-login skipped');
+                            }
+                        }, 2000);
+                    }
                     
                 } catch (error) {
-                    messageDiv.textContent = error.message;
+                    console.error('Signup failed:', error);
+                    messageDiv.textContent = error.message || 'Signup failed. Please try again.';
                     messageDiv.className = 'message error';
+                } finally {
+                    loadingDiv.classList.remove('active');
                 }
             });
-        });
+        }
+        
+        // Check if already logged in
+        async function checkAuthStatus() {
+            if (supabase) {
+                const { data: { session } } = await supabase.auth.getSession();
+                if (session) {
+                    window.location.href = 'dashboard.html';
+                }
+            }
+        }
+        
+        // Check auth status after init
+        setTimeout(checkAuthStatus, 1000);
     </script>
 </body>
 </html>
