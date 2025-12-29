@@ -6,6 +6,8 @@
     <title>VTU Website - Buy Airtime, Data, Electricity</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- SUPABASE CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
     <!-- Navigation -->
@@ -73,10 +75,11 @@
     <!-- Footer -->
     <footer>
         <div class="container">
-            <p>&copy; 2026 VTUHub. All rights reserved.</p>
+            <p>&copy; 2023 VTUHub. All rights reserved.</p>
         </div>
     </footer>
 
+    <!-- JavaScript -->
     <script src="supabase-config.js"></script>
     <script>
         // Mobile menu toggle
@@ -86,14 +89,22 @@
 
         // Check if user is logged in
         async function checkAuth() {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (user) {
-                const loginBtn = document.querySelector('.btn-login');
-                loginBtn.textContent = 'Dashboard';
-                loginBtn.href = 'dashboard.html';
-            }
+            // Wait for Supabase to initialize
+            setTimeout(async () => {
+                if (window.supabaseClient) {
+                    const { data: { user } } = await window.supabaseClient.auth.getUser();
+                    if (user) {
+                        const loginBtn = document.querySelector('.btn-login');
+                        if (loginBtn) {
+                            loginBtn.textContent = 'Dashboard';
+                            loginBtn.href = 'dashboard.html';
+                        }
+                    }
+                }
+            }, 1000);
         }
+        
         checkAuth();
     </script>
 </body>
-</html>
+    </html>
