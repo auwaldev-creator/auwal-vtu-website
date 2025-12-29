@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- SUPABASE CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7/dist/umd/supabase.min.js"></script>
 </head>
 <body>
     <!-- Navigation -->
@@ -79,8 +79,6 @@
         </div>
     </footer>
 
-    <!-- JavaScript -->
-    <script src="supabase-config.js"></script>
     <script>
         // Mobile menu toggle
         document.querySelector('.menu-toggle').addEventListener('click', () => {
@@ -88,11 +86,16 @@
         });
 
         // Check if user is logged in
-        async function checkAuth() {
-            // Wait for Supabase to initialize
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Wait for Supabase
             setTimeout(async () => {
-                if (window.supabaseClient) {
-                    const { data: { user } } = await window.supabaseClient.auth.getUser();
+                if (typeof supabase !== 'undefined') {
+                    const supabaseClient = supabase.createClient(
+                        'https://emsfczgikwhfjpgwkyqv.supabase.co',
+                        'sb_publishable_AuyN3-6VqWkMn11d1T_wmg_-RagFA47'
+                    );
+                    
+                    const { data: { user } } = await supabaseClient.auth.getUser();
                     if (user) {
                         const loginBtn = document.querySelector('.btn-login');
                         if (loginBtn) {
@@ -102,9 +105,7 @@
                     }
                 }
             }, 1000);
-        }
-        
-        checkAuth();
+        });
     </script>
 </body>
-    </html>
+</html>
