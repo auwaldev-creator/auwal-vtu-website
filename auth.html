@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | VTU Website</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- SUPABASE CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7/dist/umd/supabase.min.js"></script>
+    <style>
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 10px;
+            color: #666;
+        }
+        .loading.active {
+            display: block;
+        }
+        .spinner {
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-right: 10px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .alternative-registration {
+            text-align: center;
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #e5e7eb;
+        }
+    </style>
+</head>
+<body class="auth-page">
+    <div class="auth-container">
+        <div class="auth-box">
+            <div class="auth-tabs">
+                <button class="tab active" id="loginTab" data-tab="login">Login</button>
+                <button class="tab" id="signupTab" data-tab="signup">Sign Up</button>
+            </div>
+
+            <!-- Login Form -->
+            <form id="loginForm" class="auth-form active">
+                <h2>Welcome Back</h2>
+                <div class="input-group">
+                    <label for="loginEmail">Email</label>
+                    <input type="email" id="loginEmail" placeholder="your@email.com" required>
+                </div>
+                <div class="input-group">
+                    <label for="loginPassword">Password</label>
+                    <input type="password" id="loginPassword" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="btn-primary btn-block">Login</button>
+                <p class="auth-link">Don't have an account? <a href="#" id="goToSignup">Sign up</a></p>
+            </form>
+
+            <!-- Signup Form -->
+            <form id="signupForm" class="auth-form">
+                <h2>Create Account</h2>
+                <div class="input-group">
+                    <label for="signupEmail">Email</label>
+                    <input type="email" id="signupEmail" placeholder="your@email.com" required>
+                </div>
+                <div class="input-group">
+                    <label for="signupPassword">Password</label>
+                    <input type="password" id="signupPassword" placeholder="••••••••" required>
+                </div>
+                <div class="input-group">
+                    <label for="confirmPassword">Confirm Password</label>
+                    <input type="password" id="confirmPassword" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="btn-primary btn-block">Create Account</button>
+                <p class="auth-link">Already have an account? <a href="#" id="goToLogin">Login</a></p>
+            </form>
+
+            <!-- Alternative Registration Option -->
+            <div class="alternative-registration">
+                <p>Want full account verification?</p>
+                <a href="register.html" class="btn-secondary">
+                    <i class="fas fa-user-check"></i> Complete Registration
+                </a>
+                <p style="font-size: 0.8rem; color: #6b7280; margin-top: 10px;">
+                    Includes: Phone, NIN/BVN, Face Verification, Transaction PIN
+                </p>
+            </div>
+
+            <div id="authMessage" class="message"></div>
+            <div id="loading" class="loading">
+                <i class="fas fa-spinner spinner"></i> Processing...
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Supabase configuration
+        const SUPABASE_URL = 'https://emsfczgikwhfjpgwkyqv.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_AuyN3-6VqWkMn11d1T_wmg_-RagFA47';
+        
+        let supabaseClient;
+        
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Page loaded, initializing...');
+            
+            // Check if Supabase is loaded
+            if (typeof supabase === 'undefined') {
+                showError('Supabase not loaded. Please refresh page.');
+                return;
+            }
+            
+            // Create Supabase client
+            try {
+                supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+                    auth: {
+                        persistSession: true,
+                        autoRefreshToken: true,
+                        detectSessionInUrl: true
+                    }
+                });
+                console.log('Supabase client created successfully');
+            } catch (error) {
+                showError('Error creating Supabase client: ' + error.message);
+                return;
+            }
+            
+            // Setup event listeners
+            setupEventListeners();
+            
+            // Check if already logged in
+            checkExistingSession();
+            
+            // Check for email parameter (from register page)
+            const urlParams = new URLSearchParams(window.location.search);
+            const email = urlParams.get('email');
+            if (email) {
+                document.getElementById('loginEmail').value = email;
+                document.getElementById('signupEmail').value = email;
+            }
+        });
+        
+        function setupEventListeners() {
+            // Tab switching
+            document.getElementById('loginTab').addEventListener('click', () => switchTab('login'));
+            document.getElementById('signupTab').addEventListener('click', () => switchTab('signup'));
+            document.getElementById('goToSignup').addEventListener('click', (e) => {
+                e.preventDefault();
+                switchTab('signup');
+            });
+            document.getElementById('goToLogin').addEventListener('click', (e) => {
+                e.preventDefault();
+                switchTab('login');
+            });
+            
+            // Form submissions
+            document.getElementById('loginForm').addEventListener('submit', handleLogin);
+            document.getElementById('signupForm').addEventListener('submit', handleSignup);
+            
+            // Password confirmation check
+            document.getElementById('confirmPassword').addEventListener('input', checkPasswordMatch);
+            document.getElementById('signupPassword').addEventListener('input', checkPasswordMatch);
+        }
+        
+        function switchTab(tabName) {
+            // Update tabs
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.auth-form').forEach(form => form.classList.remove('active'));
+            
+            if (tabName === 'login') {
+                document.getElementById('loginTab').classList.add('active');
+                document.getElementById('loginForm').classList.add('active');
+            } else {
+                document.getElementById('signupTab').classList.add('active');
+                document.getElementById('signupForm').classList.add('active');
+            }
+            
+            // Clear messages
+            clearMessage();
+        }
+        
+        async function handleLogin(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value;
+            
+            if (!email || !password) {
+                showError('Please fill in all fields');
+                return;
+            }
+            
+            if (!validateEmail(email)) {
+                showError('Please enter a valid email address');
+                return;
+            }
+            
+            showLoading();
+            clearMessage();
+            
+            try {
+                console.log('Attempting login for:', email);
+                const { data, error } = await supabaseClient.auth.signInWithPassword({
+                    email,
+                    password
+                });
+                
+                if (error) {
+                    console.error('Login error:', error);
+                    throw error;
+                }
+                
+                console.log('Login successful for:', data.user.email);
+                showSuccess('Login successful! Redirecting...');
+                
+                setTimeout(() => {
+                    window.location.href = 'dashboard.html';
+                }, 1500);
+                
+            } catch (error) {
+                console.error('Login failed:', error);
+                showError(error.message || 'Login failed. Please check credentials.');
+            } finally {
+                hideLoading();
+            }
+        }
+        
+        async function handleSignup(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('signupEmail').value.trim();
+            const password = document.getElementById('signupPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            // Validation
+            if (!email || !password || !confirmPassword) {
+                showError('Please fill in all fields');
+                return;
+            }
+            
+            if (!validateEmail(email)) {
+                showError('Please enter a valid email address');
+                return;
+            }
+            
+            if (password !== confirmPassword) {
+                showError('Passwords do not match');
+                return;
+            }
+            
+            if (password.length < 6) {
+                showError('Password must be at least 6 characters');
+                return;
+            }
+            
+            showLoading();
+            clearMessage();
+            
+            try {
+                console.log('Attempting signup for:', email);
+                const { data, error } = await supabaseClient.auth.signUp({
+                    email,
+                    password,
+                    options: {
+                        emailRedirectTo: window.location.origin + '/dashboard.html',
+                        data: {
+                            email_confirmed: true // Auto-confirm for testing
+                        }
+                    }
+                });
+                
+                if (error) {
+                    console.error('Signup error:', error);
+                    throw error;
+                }
+                
+                console.log('Signup response:', data);
+                
+                if (data.user?.identities?.length === 0) {
+                    showError('User already exists. Please login instead.');
+                    return;
+                }
+                
+                // Create basic profile
+                try {
+                    const { error: profileError } = await supabaseClient
+                        .from('profiles')
+                        .insert({
+                            id: data.user.id,
+                            email: email,
+                            full_name: email.split('@')[0],
+                            balance: 0.00,
+                            created_at: new Date()
+                        });
+                    
+                    if (profileError) {
+                        console.error('Profile creation error:', profileError);
+                    }
+                } catch (profileErr) {
+                    console.error('Profile error:', profileErr);
+                }
+                
+                showSuccess('Account created successfully! You can now login.');
+                
+                // Auto-login after signup
+                setTimeout(async () => {
+                    try {
+                        const { error: loginError } = await supabaseClient.auth.signInWithPassword({
+                            email,
+                            password
+                        });
+                        
+                        if (!loginError) {
+                            showSuccess('Auto-login successful! Redirecting...');
+                            setTimeout(() => {
+                                window.location.href = 'dashboard.html';
+                            }, 1000);
+                        }
+                    } catch (loginErr) {
+                        console.log('Auto-login skipped, please login manually');
+                        switchTab('login');
+                        document.getElementById('loginEmail').value = email;
+                    }
+                }, 2000);
+                
+            } catch (error) {
+                console.error('Signup failed:', error);
+                showError(error.message || 'Signup failed. Please try again.');
+            } finally {
+                hideLoading();
+            }
+        }
+        
+        function checkPasswordMatch() {
+            const password = document.getElementById('signupPassword').value;
+            const confirm = document.getElementById('confirmPassword').value;
+            
+            if (password && confirm) {
+                if (password === confirm && password.length >= 6) {
+                    document.getElementById('signupBtn').disabled = false;
+                } else {
+                    document.getElementById('signupBtn').disabled = true;
+                }
+            }
+        }
+        
+        async function checkExistingSession() {
+            try {
+                const { data: { session } } = await supabaseClient.auth.getSession();
+                if (session) {
+                    console.log('Existing session found, redirecting to dashboard');
+                    window.location.href = 'dashboard.html';
+                }
+            } catch (error) {
+                console.log('No existing session');
+            }
+        }
+        
+        // Validation helper
+        function validateEmail(email) {
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return re.test(email);
+        }
+        
+        // UI Helper functions
+        function showLoading() {
+            document.getElementById('loading').classList.add('active');
+            document.getElementById('loginBtn').disabled = true;
+            document.getElementById('signupBtn').disabled = true;
+        }
+        
+        function hideLoading() {
+            document.getElementById('loading').classList.remove('active');
+            document.getElementById('loginBtn').disabled = false;
+            document.getElementById('signupBtn').disabled = false;
+        }
+        
+        function showMessage(text, type) {
+            const messageDiv = document.getElementById('authMessage');
+            messageDiv.textContent = text;
+            messageDiv.className = 'message ' + type;
+        }
+        
+        function showSuccess(text) {
+            showMessage(text, 'success');
+        }
+        
+        function showError(text) {
+            showMessage(text, 'error');
+        }
+        
+        function clearMessage() {
+            const messageDiv = document.getElementById('authMessage');
+            messageDiv.textContent = '';
+            messageDiv.className = 'message';
+        }
+        
+        // Expose supabase client globally for debugging
+        window.supabaseClient = supabaseClient;
+    </script>
+</body>
+</html>
