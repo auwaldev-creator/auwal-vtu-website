@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Services | VTU Website</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- SUPABASE CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7/dist/umd/supabase.min.js"></script>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a href="index.html" class="logo">VTU<span>Hub</span></a>
+            <div class="nav-links">
+                <a href="dashboard.html">Dashboard</a>
+                <a href="services.html" class="active">Services</a>
+                <a href="profile.html">Profile</a>
+                <a href="#" id="logoutBtn">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1 class="section-title">VTU Services</h1>
+        
+        <!-- Data Services -->
+        <div id="data" class="services-container">
+            <h2><i class="fas fa-wifi"></i> Data Bundle</h2>
+            <form class="service-form" id="dataForm">
+                <div class="form-group">
+                    <label>Network</label>
+                    <div class="network-options">
+                        <button type="button" class="network-btn active" data-network="MTN">MTN</button>
+                        <button type="button" class="network-btn" data-network="GLO">Glo</button>
+                        <button type="button" class="network-btn" data-network="AIRTEL">Airtel</button>
+                        <button type="button" class="network-btn" data-network="9MOBILE">9mobile</button>
+                    </div>
+                    <input type="hidden" id="dataNetwork" value="MTN">
+                </div>
+                
+                <div class="form-group">
+                    <label>Phone Number</label>
+                    <input type="tel" id="dataPhone" placeholder="08012345678" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Data Plan</label>
+                    <select id="dataPlan" required>
+                        <option value="">Select plan</option>
+                        <option value="100MB">100MB - ₦100</option>
+                        <option value="200MB">200MB - ₦200</option>
+                        <option value="500MB">500MB - ₦500</option>
+                        <option value="1GB">1GB - ₦1,000</option>
+                        <option value="2GB">2GB - ₦2,000</option>
+                        <option value="5GB">5GB - ₦5,000</option>
+                    </select>
+                </div>
+                
+                <button type="submit" class="btn-primary btn-block">Buy Data Now</button>
+            </form>
+        </div>
+        
+        <!-- Airtime Services -->
+        <div id="airtime" class="services-container">
+            <h2><i class="fas fa-phone-alt"></i> Airtime Top-up</h2>
+            <form class="service-form" id="airtimeForm">
+                <div class="form-group">
+                    <label>Phone Number</label>
+                    <input type="tel" id="airtimePhone" placeholder="08012345678" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Amount (₦)</label>
+                    <input type="number" id="airtimeAmount" min="50" max="10000" placeholder="500" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Network</label>
+                    <select id="airtimeNetwork" required>
+                        <option value="MTN">MTN</option>
+                        <option value="GLO">Glo</option>
+                        <option value="AIRTEL">Airtel</option>
+                        <option value="9MOBILE">9mobile</option>
+                    </select>
+                </div>
+                
+                <button type="submit" class="btn-primary btn-block">Buy Airtime</button>
+            </form>
+        </div>
+        
+        <!-- Electricity -->
+        <div id="electricity" class="services-container">
+            <h2><i class="fas fa-bolt"></i> Electricity Bill</h2>
+            <form class="service-form" id="electricityForm">
+                <div class="form-group">
+                    <label>Disco Company</label>
+                    <select id="discoCompany" required>
+                        <option value="">Select company</option>
+                        <option value="IKEDC">IKEDC (Ikeja)</option>
+                        <option value="EKEDC">EKEDC (Eko)</option>
+                        <option value="IBEDC">IBEDC (Ibadan)</option>
+                        <option value="AEDC">AEDC (Abuja)</option>
+                        <option value="KEDCO">KEDCO (Kano)</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Meter Number</label>
+                    <input type="text" id="meterNumber" placeholder="Enter meter number" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Amount (₦)</label>
+                    <input type="number" id="electricityAmount" min="1000" placeholder="2000" required>
+                </div>
+                
+                <button type="submit" class="btn-primary btn-block">Pay Electricity Bill</button>
+            </form>
+        </div>
+        
+        <!-- NIN Print -->
+        <div id="nin" class="services-container">
+            <h2><i class="fas fa-print"></i> NIN Printout</h2>
+            <form class="service-form" id="ninForm">
+                <div class="form-group">
+                    <label>NIN Number</label>
+                    <input type="text" id="ninNumber" placeholder="Enter 11-digit NIN" pattern="[0-9]{11}" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Phone Number</label>
+                    <input type="tel" id="ninPhone" placeholder="Phone linked to NIN" required>
+                </div>
+                
+                <button type="submit" class="btn-primary btn-block">Generate NIN Printout</button>
+            </form>
+        </div>
+        
+        <!-- BVN Print -->
+        <div id="bvn" class="services-container">
+            <h2><i class="fas fa-id-card"></i> BVN Printout</h2>
+            <form class="service-form" id="bvnForm">
+                <div class="form-group">
+                    <label>BVN Number</label>
+                    <input type="text" id="bvnNumber" placeholder="Enter 11-digit BVN" pattern="[0-9]{11}" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Date of Birth</label>
+                    <input type="date" id="bvnDob" required>
+                </div>
+                
+                <button type="submit" class="btn-primary btn-block">Generate BVN Printout</button>
+            </form>
+        </div>
+        
+        <!-- Exam PIN -->
+        <div id="exam" class="services-container">
+            <h2><i class="fas fa-graduation-cap"></i> Exam PIN</h2>
+            <form class="service-form" id="examForm">
+                <div class="form-group">
+                    <label>Exam Type</label>
+                    <select id="examType" required>
+                        <option value="">Select exam</option>
+                        <option value="WAEC">WAEC</option>
+                        <option value="NECO">NECO</option>
+                        <option value="JAMB">JAMB</option>
+                        <option value="NABTEB">NABTEB</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Quantity</label>
+                    <select id="examQuantity" required>
+                        <option value="1">1 PIN</option>
+                        <option value="5">5 PINs</option>
+                        <option value="10">10 PINs</option>
+                        <option value="20">20 PINs</option>
+                    </select>
+                </div>
+                
+                <button type="submit" class="btn-primary btn-block">Generate Exam PINs</button>
+            </form>
+        </div>
+        
+    </div>
+
+    <script>
+        // Supabase configuration
+        const SUPABASE_URL = 'https://emsfczgikwhfjpgwkyqv.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_AuyN3-6VqWkMn11d1T_wmg_-RagFA47';
+        
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Initialize Supabase
+            if (typeof supabase === 'undefined') {
+                alert('Error loading application. Please refresh.');
+                window.location.href = 'auth.html';
+                return;
+            }
+            
+            const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            
+            // Check authentication
+            const { data: { user } } = await supabaseClient.auth.getUser();
+            if (!user) {
+                window.location.href = 'auth.html';
+                return;
+            }
+            
+            // Setup logout
+            document.getElementById('logoutBtn').addEventListener('click', async function(e) {
+                e.preventDefault();
+                await supabaseClient.auth.signOut();
+                window.location.href = 'index.html';
+            });
+            
+            // Network selection for data
+            document.querySelectorAll('.network-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.network-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    document.getElementById('dataNetwork').value = this.dataset.network;
+                });
+            });
+            
+            // Handle form submissions
+            document.querySelectorAll('.service-form').forEach(form => {
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    const serviceName = this.closest('.services-container').querySelector('h2').textContent;
+                    alert(`✅ ${serviceName} request submitted!\n\nThis is a demo. For real services, connect to VTU API.`);
+                    
+                    // Reset form
+                    this.reset();
+                    
+                    // Reset network buttons
+                    if (this.id === 'dataForm') {
+                        document.querySelectorAll('.network-btn').forEach(b => b.classList.remove('active'));
+                        document.querySelector('.network-btn[data-network="MTN"]').classList.add('active');
+                        document.getElementById('dataNetwork').value = 'MTN';
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+                      </html>
