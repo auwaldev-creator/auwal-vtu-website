@@ -6,6 +6,8 @@
     <title>Login | VTU Website</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- SUPABASE CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body class="auth-page">
     <div class="auth-container">
@@ -54,28 +56,133 @@
     </div>
 
     <script src="supabase-config.js"></script>
-    <script src="js/auth.js"></script>
     <script>
-        // Tab switching
-        document.querySelectorAll('.tab').forEach(tab => {
-            tab.addEventListener('click', () => {
-                const tabName = tab.dataset.tab;
-                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-                tab.classList.add('active');
-                document.querySelectorAll('.auth-form').forEach(form => form.classList.remove('active'));
-                document.getElementById(tabName + 'Form').classList.add('active');
+        // Wait for Supabase to initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize Supabase
+            initSupabase();
+            
+            // Tab switching
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const tabName = tab.dataset.tab;
+                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    document.querySelectorAll('.auth-form').forEach(form => form.classList.remove('active'));
+                    document.getElementById(tabName + 'Form').classList.add('active');
+                });
             });
-        });
 
-        // Switch links
-        document.querySelector('.switch-to-signup').addEventListener('click', (e) => {
-            e.preventDefault();
-            document.querySelector('[data-tab="signup"]').click();
-        });
+            // Switch links
+            document.querySelector('.switch-to-signup').addEventListener('click', (e) => {
+                e.preventDefault();
+                document.querySelector('[data-tab="signup"]').click();
+            });
 
-        document.querySelector('.switch-to-login').addEventListener('click', (e) => {
-            e.preventDefault();
-            document.querySelector('[data-tab="login"]').click();
+            document.querySelector('.switch-to-login').addEventListener('click', (e) => {
+                e.preventDefault();
+                document.querySelector('[data-tab="login"]').click();
+            });
+
+            // Handle Login
+            document.getElementById('loginForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                if (!window.supabaseClient) {
+                    alert('Supabase not loaded. Please refresh page.');
+                    return;
+                }
+                
+                const email = document.getElementById('loginEmail').value;
+                const password = document.getElementById('loginPassword').value;
+                const messageDiv = document.getElementById('authMessage');
+                
+                messageDiv.textContent = 'Logging in...';
+                messageDiv.className = 'message';
+                
+                try {
+                    const { data, error } = await window.supabaseClient.auth.signInWithPassword({
+                        email,
+                        password
+                    });
+                    
+                    if (error) throw error;
+                    
+                    messageDiv.textContent = 'Login successful! Redirecting...';
+                    messageDiv.className = 'message success';
+                    
+                    // Redirect to dashboard
+                    setTimeout(() => {
+                        window.location.href = 'dashboard.html';
+                    }, 1500);
+                    
+                } catch (error) {
+                    messageDiv.textContent = error.message;
+                    messageDiv.className = 'message error';
+                }
+            });
+
+            // Handle Signup
+            document.getElementById('signupForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                if (!window.supabaseClient) {
+                    alert('Supabase not loaded. Please refresh page.');
+                    return;
+                }
+                
+                const email = document.getElementById('signupEmail').value;
+                const password = document.getElementById('signupPassword').value;
+                const confirmPassword = document.getElementById('confirmPassword').value;
+                const messageDiv = document.getElementById('authMessage');
+                
+                // Validate passwords match
+                if (password !== confirmPassword) {
+                    messageDiv.textContent = 'Passwords do not match!';
+                    messageDiv.className = 'message error';
+                    return;
+                }
+                
+                if (password.length < 6) {
+                    messageDiv.textContent = 'Password must be at least 6 characters';
+                    messageDiv.className = 'message error';
+                    return;
+                }
+                
+                messageDiv.textContent = 'Creating account...';
+                messageDiv.className = 'message';
+                
+                try {
+                    const { data, error } = await window.supabaseClient.auth.signUp({
+                        email,
+                        password,
+                        options: {
+                            emailRedirectTo: window.location.origin + '/dashboard.html'
+                        }
+                    });
+                    
+                    if (error) throw error;
+                    
+                    messageDiv.textContent = 'Account created! Check email for verification.';
+                    messageDiv.className = 'message success';
+                    
+                    // Auto-login after signup
+                    setTimeout(async () => {
+                        const { error: loginError } = await window.supabaseClient.auth.signInWithPassword({
+                            email,
+                            password
+                        });
+                        
+                        if (!loginError) {
+                            window.location.href = 'dashboard.html';
+                        }
+                    }, 2000);
+                    
+                } catch (error) {
+                    messageDiv.textContent = error.message;
+                    messageDiv.className = 'message error';
+                }
+            });
         });
     </script>
 </body>
