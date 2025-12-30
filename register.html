@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Account - OPay Style</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+<div class="container d-flex justify-content-center align-items-center min-vh-100">
+    <div class="register-card">
+        
+        <div class="progress mb-4" style="height: 5px;">
+            <div class="progress-bar bg-success" role="progressbar" style="width: 10%;" id="progressBar"></div>
+        </div>
+
+        <h4 class="text-center fw-bold mb-4" id="stepTitle">Getting Started</h4>
+
+        <div class="step-section" id="step1">
+            <label>Email Address</label>
+            <input type="email" id="email" class="form-control mb-3" placeholder="example@gmail.com">
+            <label>Phone Number</label>
+            <input type="number" id="phone" class="form-control mb-3" placeholder="08012345678">
+            <button class="btn btn-primary w-100" onclick="nextStep(2)">Verify & Continue</button>
+        </div>
+
+        <div class="step-section d-none" id="step2">
+            <label>First Name</label>
+            <input type="text" id="firstName" class="form-control mb-3">
+            <label>Last Name</label>
+            <input type="text" id="lastName" class="form-control mb-3">
+            <button class="btn btn-primary w-100" onclick="nextStep(3)">Next</button>
+        </div>
+
+        <div class="step-section d-none" id="step3">
+            <label>NIN or BVN Number</label>
+            <input type="number" id="nin" class="form-control mb-3" placeholder="11 Digits">
+            <small class="text-muted d-block mb-3">We need this to verify your identity (NIMC Standard).</small>
+            <button class="btn btn-primary w-100" onclick="nextStep(4)">Verify Identity</button>
+        </div>
+
+        <div class="step-section d-none text-center" id="step4">
+            <div class="camera-box mb-3">
+                <video id="video" autoplay playsinline style="width: 100%; border-radius: 10px; display:none;"></video>
+                <canvas id="canvas" style="display:none;"></canvas>
+                <img id="placeholder-face" src="https://cdn-icons-png.flaticon.com/512/1177/1177568.png" width="100">
+            </div>
+            <p class="small">Position your face in the frame</p>
+            <button class="btn btn-outline-success mb-2" onclick="startCamera()">Open Camera</button>
+            <button class="btn btn-primary w-100" id="captureBtn" onclick="captureFace()" disabled>Capture & Verify</button>
+        </div>
+
+        <div class="step-section d-none" id="step5">
+            <label>Home Address</label>
+            <textarea id="address" class="form-control mb-3" rows="3"></textarea>
+            <button class="btn btn-primary w-100" onclick="nextStep(6)">Next</button>
+        </div>
+
+        <div class="step-section d-none" id="step6">
+            <label>Create Login Password</label>
+            <input type="password" id="password" class="form-control mb-3">
+            <label>Confirm Password</label>
+            <input type="password" id="confirmPassword" class="form-control mb-3">
+            <button class="btn btn-primary w-100" onclick="nextStep(7)">Set Password</button>
+        </div>
+
+        <div class="step-section d-none" id="step7">
+            <label>Create 4-Digit PIN</label>
+            <input type="tel" id="txPin" maxlength="4" class="form-control mb-3 text-center fs-3" placeholder="****">
+            <small class="text-danger">Do not share this PIN with anyone.</small>
+            <button class="btn btn-success w-100 mt-3" onclick="submitRegistration()">Complete Registration</button>
+        </div>
+
+        <div class="step-section d-none text-center" id="step8">
+            <i class="fas fa-check-circle text-success fa-5x mb-3"></i>
+            <h4>Congratulations!</h4>
+            <p>Your account has been created successfully.</p>
+            <div class="alert alert-info">
+                <strong>Account Number:</strong> <span id="genAccNum">...</span><br>
+                <strong>Bank:</strong> Muryar VTU Wallet
+            </div>
+            <a href="dashboard.html" class="btn btn-primary w-100">Go to Dashboard</a>
+        </div>
+
+    </div>
+</div>
+
+<script src="supabase-config.js"></script>
+<script src="js/register.js"></script> 
+
+</body>
+      </html>
